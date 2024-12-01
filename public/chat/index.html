@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        
+    </style>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>  
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <section class="history-section">
+            <header class="history-header">
+                <h2>CHAT HISTORY</h2>
+            </header>
+            <div class="history-list" id="historyList">
+                
+                <!-- Add more chat history items as needed -->
+            </div>
+            <button id="newChatButton" class="new-chat-button">New Chat</button>
+        </section>
+
+        <section class="chat-section">
+            <header class="chat-header">
+                <h1>Command R+</h1>
+                <p>A conversational tool for web searches, citing sources, research, drafting, debugging, and more.</p>
+            </header>
+
+            <main class="chat-content">
+                <div class="initial-content">
+                    <div class="logo"></div>
+                    <h2>Where knowledge begins</h2>
+                    <p>Uses multiple sources and tools to answer questions with citations.</p>
+
+                    <div id="cardsContainer" class="cards-container">
+                        <div id="updateCard" class="card animate__animated animate__fadeIn">
+                            <h3>STAY UPDATED</h3>
+                            <p>Loading suggestions...</p>
+                        </div>
+                        <div id="researchCard" class="card animate__animated animate__fadeIn">
+                            <h3>RESEARCH</h3>
+                            <p>Loading suggestions...</p>
+                        </div>
+                        <div id="learnCard" class="card animate__animated animate__fadeIn">
+                            <h3>LEARN A TOPIC</h3>
+                            <p>Loading suggestions...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="chat-input">
+                <div class="toggles">
+                    <button class="toggle" data-tool="calendar">Calendar</button>
+                    <button class="toggle" data-tool="gmail">Gmail</button>
+                    <button class="toggle" data-tool="web-search">Web Search</button>
+                </div>
+                <div class="input-container">
+                    <textarea class="message-input" placeholder="Write a message here..."></textarea>
+                    <button class="send-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/>
+                        </svg>
+                    </button>
+                </div>
+            </footer>
+        </section>
+
+        <section class="tools-section">
+            <header class="tools-header">
+                <h2>TOOLS</h2>
+            </header>
+            <div class="tools-list">
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <div class="tool-name">Calendar</div>
+                        <div class="tool-description">Integrates with Google Calendar.</div>
+                    </div>
+                    <div class="tool-toggle" data-tool="calendar"></div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <div class="tool-name">Gmail</div>
+                        <div class="tool-description">Integrates with Gmail.</div>
+                    </div>
+                    <div class="tool-toggle" data-tool="gmail"></div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <div class="tool-name">Web Search</div>
+                        <div class="tool-description">Searches the web</div>
+                    </div>
+                    <div class="tool-toggle" data-tool="web-search"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+
+    </script>
+    <script src="onload.js"></script>
+    <script src="../utilities/display.js"></script>
+    <script src="../utilities/tools.js"></script>
+    <script src="../utilities/tool_executor.js"></script>
+    <script src="../utilities/tool_handler.js"></script>
+    <script src="history.js"></script>
+    <script src="chat.js"></script>
+</body>
+</html>
