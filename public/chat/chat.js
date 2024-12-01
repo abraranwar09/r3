@@ -35,11 +35,19 @@ async function sendMessage() {
         const activeToolTypes = getActiveToolTypes();
         const activeTools = window.toolsModule.getActiveTools(activeToolTypes);
 
+        // Create tool states map
+        const toolStates = {};
+        document.querySelectorAll('.tool-toggle').forEach(toggle => {
+            const toolType = toggle.getAttribute('data-tool');
+            toolStates[toolType] = toggle.classList.contains('active');
+        });
+
         const requestBody = {
             session_id: session_id,
             user_id: userId,
             message: message + reprompt,
-            tools: activeTools
+            tools: activeTools,
+            tool_states: toolStates
         };
 
         try {

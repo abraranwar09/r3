@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     historyList.appendChild(spinner);
 
     if (userId) {
-        fetch(`http://localhost:3000/ai/history/list/${userId}`)
+        fetch(`/ai/history/list/${userId}`)
             .then(response => response.json())
             .then(data => {
                 // Remove loading spinner
@@ -45,18 +45,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         fetch(`/ai/history/${sessionId}`)
                             .then(response => response.json())
                             .then(sessionData => {
+                                // Restore tool states
+                                const toolToggles = document.querySelectorAll('.tool-toggle');
+                                toolToggles.forEach(toggle => {
+                                    const toolType = toggle.getAttribute('data-tool');
+                                    if (sessionData.tool_states && sessionData.tool_states[toolType] !== undefined) {
+                                        toggle.classList.toggle('active', sessionData.tool_states[toolType]);
+                                    } else {
+                                        toggle.classList.remove('active');
+                                    }
+                                });
+
+                                // Display messages
                                 sessionData.messages.forEach(message => {
                                     if (message.role === 'user') {
-                                        //split message content by the following string: "Hidden Context"
                                         const messageContent = message.content.split("Hidden Context")[0];
                                         displayMessage(messageContent, 'user-message');
                                     } else if (message.role === 'assistant' && message.content !== null) {
                                         displayMessage(message.content, 'ai-message');
-                                    } else if (message.role === 'system') {
-                                        console.log('system message ignored');
-                                    } else if (message.role === "tool") {
-                                        console.log('tool message ignored');
-                                    };          
+                                    }
                                 });
                             })
                             .catch(error => console.error('Error fetching session data:', error));

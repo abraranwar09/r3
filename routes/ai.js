@@ -26,7 +26,8 @@ const chatHistorySchema = new mongoose.Schema({
     name: { type: String },
     messages: [messageSchema],
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
+    updated_at: { type: Date, default: Date.now },
+    tool_states: { type: Map, of: Boolean, default: new Map() }
 });
 
 const ChatHistory = mongoose.model('ChatHistory', chatHistorySchema);
@@ -37,7 +38,7 @@ router.use(express.json());
 // Chat endpoint
 router.post('/chat', async (req, res) => {
     try {
-        const { message, session_id, tools, user_id } = req.body;
+        const { message, session_id, tools, user_id, tool_states } = req.body;
 
         if (!message || !user_id) {
             return res.status(400).json({
@@ -53,6 +54,7 @@ router.post('/chat', async (req, res) => {
                 user_id,
                 session_id,
                 name: chatName,
+                tool_states: new Map(Object.entries(tool_states || {})),
                 messages: [{"role": "system", "content": `
                             You are a helpful assistant. You can use your tools to help the user with their queries.
                             Format your responses as structured HTML with the appropriate tags and styling like lists, paragraphs, etc. 
@@ -60,6 +62,9 @@ router.post('/chat', async (req, res) => {
                             with another tool call if you want to chain tool calls.
                             `}]
             });
+        } else {
+            // Update tool states
+            chatHistory.tool_states = new Map(Object.entries(tool_states || {}));
         }
 
         // Add user message to history

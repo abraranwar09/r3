@@ -3,7 +3,8 @@ const toolMapping = {
     'calendar': ['getCalendarEvents', 'saveEvent'],
     'gmail': ['listGmailMessages', 'getGmailMessage', 'sendGmailMessage'],
     'web-search': ['performGoogleSearch'],
-    'perplexity': ['usePerplexity']
+    'perplexity': ['usePerplexity'],
+    'knowledge-base': ['checkKnowledgeBase']
 };
 
 // Initialize tools array (keeping your existing tools array)
@@ -167,6 +168,24 @@ const tools = [
                     query: {
                         type: "string",
                         description: "The search query to look up using Perplexity.",
+                    },
+                },
+                required: ["query"],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: "function",
+        function: {
+            name: "checkKnowledgeBase",
+            description: "Search through the company's knowledge base for relevant information.",
+            parameters: {
+                type: "object",
+                properties: {
+                    query: {
+                        type: "string",
+                        description: "The search query to look up in the knowledge base.",
                     },
                 },
                 required: ["query"],

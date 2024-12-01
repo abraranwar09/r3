@@ -11,7 +11,7 @@ const googleRoutes = require('./routes/google'); // Import the google routes
 const perplexityRoutes = require('./routes/perplexity'); // Import the perplexity routes
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Use CORS middleware
 app.use(cors());

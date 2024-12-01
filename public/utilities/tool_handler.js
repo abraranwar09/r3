@@ -32,6 +32,9 @@ async function handleToolCalls(data) {
             case 'usePerplexity':
                 usePerplexity(args.query, functionName, data.tool_calls[0].id);
                 break;
+            case 'checkKnowledgeBase':
+                checkKnowledgeBase(args.query, functionName, data.tool_calls[0].id);
+                break;
             default:
                 console.warn(`Unhandled function name: ${functionName}`);
         }

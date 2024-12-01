@@ -391,6 +391,54 @@ async function usePerplexity(query, functionName, toolCallId) {
     }
 }
 
+//function to check knowledge base
+async function checkKnowledgeBase(query, functionName, toolCallId) {
+    const sessionId = localStorage.getItem('session_id');
+    const userId = localStorage.getItem('userId');
+
+    try {
+        const response = await fetch("https://coreapi.inovasolutions.ai/v1/workflows/run", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer app-X8irMeOKWmXoKymsp1sJqXku",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                inputs: {
+                    query: query
+                },
+                response_mode: "blocking",
+                user: userId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        const toolCallResults = data;
+
+        let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
+        console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
+        displayMessage(toolCallResponse.response, 'ai-message');
+
+    } catch (error) {
+        console.error('Error checking knowledge base:', error);
+        const toolCallResults = {
+            "status": "error",
+            "message": `There was an error checking the knowledge base. Please try again later.`
+        };
+
+        let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
+        console.log('toolCallResponse', toolCallResponse);
+        displayMessage(toolCallResponse.response, 'ai-message');
+        return;
+    }
+}
+
 
 
 
