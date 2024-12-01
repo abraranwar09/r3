@@ -8,6 +8,7 @@ require('./utils/passport-setup'); // Import the passport setup
 const authRoutes = require('./routes/auth'); // Import the auth routes
 const aiRoutes = require('./routes/ai'); // Import the ai routes
 const googleRoutes = require('./routes/google'); // Import the google routes
+const perplexityRoutes = require('./routes/perplexity'); // Import the perplexity routes
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,9 +16,9 @@ const port = process.env.PORT || 3000;
 // Use CORS middleware
 app.use(cors());
 
-// Add this line to parse JSON bodies
-app.use(express.json());
-
+// Configure JSON and URL-encoded body parsers with increased limits
+app.use(express.json({limit: '500mb'}));
+app.use(express.urlencoded({limit: '500mb', extended: true}));
 
 // Use session middleware
 app.use(session({
@@ -39,6 +40,8 @@ app.use('/auth', authRoutes);
 app.use('/ai', aiRoutes);
 // Use the google routes
 app.use('/google', googleRoutes);
+// Use the perplexity routes
+app.use('/perplexity', perplexityRoutes);
 
 // Function to start the server
 const startServer = async () => {

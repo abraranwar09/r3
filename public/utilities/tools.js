@@ -1,18 +1,13 @@
-//initialize tools array
+// Tool mapping object to define which functions belong to which tools
+const toolMapping = {
+    'calendar': ['getCalendarEvents', 'saveEvent'],
+    'gmail': ['listGmailMessages', 'getGmailMessage', 'sendGmailMessage'],
+    'web-search': ['performGoogleSearch'],
+    'perplexity': ['usePerplexity']
+};
+
+// Initialize tools array (keeping your existing tools array)
 const tools = [
-    // {
-    //     type: "function",
-    //     function: {
-    //         name: "open_google",
-    //         description: "open google in a new tab with a specific search query",
-    //         parameters: {
-    //             type: "object",
-    //             properties: {
-    //                 query: { type: "string", description: "The search query to open google with" }
-    //             }
-    //         }
-    //     }
-    // },
     {
         type: "function",
         function: {
@@ -160,5 +155,40 @@ const tools = [
                 }
             }
         }
+    },
+    {
+        type: "function",
+        function: {
+            name: "usePerplexity",
+            description: "Search for information on the web using Perplexity AI. Whenever asked to search the web, use this tool.",
+            parameters: {
+                type: "object",
+                properties: {
+                    query: {
+                        type: "string",
+                        description: "The search query to look up using Perplexity.",
+                    },
+                },
+                required: ["query"],
+                additionalProperties: false,
+            },
+        },
     }
 ];
+
+// Function to get active tools based on active toggles
+function getActiveTools(activeToolTypes) {
+    return tools.filter(tool => {
+        const functionName = tool.function.name;
+        return activeToolTypes.some(toolType => 
+            toolMapping[toolType].includes(functionName)
+        );
+    });
+}
+
+// Make tools and functions available globally
+window.toolsModule = {
+    tools,
+    getActiveTools,
+    toolMapping
+};

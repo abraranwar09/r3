@@ -5,39 +5,44 @@ const formattedToday = today.toLocaleString('en-US', { timeZone: userTimeZone })
 
 const reprompt = `Hidden Context (the user is not aware this is part of their message): The users timezone is ${userTimeZone}. The current date/time is ${formattedToday}.`;
 
+function getActiveToolTypes() {
+    const activeToggles = document.querySelectorAll('.toggle.active, .tool-toggle.active');
+    return Array.from(activeToggles).map(toggle => toggle.dataset.tool);
+}
+
 async function sendMessage() {
     const message = messageInput.value.trim();
     if (message) {
-        // Remove initial content
         if (initialContent) {
             initialContent.remove();
         }
 
-        // Add user message
-        // const userMessage = document.createElement('div');
-        // userMessage.classList.add('message', 'user-message');
-        // userMessage.textContent = message;
-        // chatContent.appendChild(userMessage);
         displayMessage(message, 'user-message');
-
-
-        // Clear input
         messageInput.value = '';
 
-        // Fetch session_id from localStorage
+        const skeletonLoader = document.createElement('div');
+        skeletonLoader.className = 'skeleton-message';
+        skeletonLoader.innerHTML = `
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+        `;
+        chatContent.appendChild(skeletonLoader);
+
         const session_id = localStorage.getItem('session_id');
         const userId = localStorage.getItem('userId');
         
-        // Prepare request body
+        const activeToolTypes = getActiveToolTypes();
+        const activeTools = window.toolsModule.getActiveTools(activeToolTypes);
+
         const requestBody = {
             session_id: session_id,
             user_id: userId,
             message: message + reprompt,
-            tools: tools // Assuming tools is a global variable
+            tools: activeTools
         };
 
         try {
-            // Make POST request to /ai/chat endpoint
             const response = await fetch('/ai/chat', {
                 method: 'POST',
                 headers: {
@@ -47,18 +52,18 @@ async function sendMessage() {
             });
 
             const data = await response.json();
-
+            
             if (data.finish_reason === 'stop') {
-                // Display AI response
+                skeletonLoader.remove();
                 displayMessage(data.response, 'ai-message');
             } else if (data.finish_reason === 'tool_calls') {
-                // Log tool calls
                 console.log(data);
                 handleToolCalls(data);
             }
 
             chatContent.scrollTop = chatContent.scrollHeight;
         } catch (error) {
+            skeletonLoader.remove();
             console.error('Error fetching AI response:', error);
         }
     }

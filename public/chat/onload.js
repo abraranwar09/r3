@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save the session_id to local storage
     localStorage.setItem('session_id', sessionId);
 
-    const toggles = document.querySelectorAll('.toggle');
     const toolToggles = document.querySelectorAll('.tool-toggle');
 
     // Fetch and update suggestion cards
@@ -28,15 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error fetching suggestions:', error));
 
-    function toggleTool(toggle) {
-        toggle.classList.toggle('active');
-        const tool = toggle.dataset.tool;
-        const sidebarToggle = document.querySelector(`.tool-toggle[data-tool="${tool}"]`);
-        if (sidebarToggle) {
-            sidebarToggle.classList.toggle('active');
-        }
-    }
-
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -45,18 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    toggles.forEach(toggle => {
-        toggle.addEventListener('click', () => toggleTool(toggle));
-    });
-
     toolToggles.forEach(toolToggle => {
         toolToggle.addEventListener('click', () => {
             toolToggle.classList.toggle('active');
-            const tool = toolToggle.dataset.tool;
-            const chatToggle = document.querySelector(`.toggle[data-tool="${tool}"]`);
-            if (chatToggle) {
-                chatToggle.classList.toggle('active');
-            }
         });
     });
 });

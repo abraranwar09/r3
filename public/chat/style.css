@@ -194,12 +194,23 @@ body {
 .tool-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
 }
 
 .tool-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     flex: 1;
+}
+
+.tool-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .tool-name {
@@ -213,6 +224,7 @@ body {
 }
 
 .tool-toggle {
+    margin-left: 12px;
     width: 40px;
     height: 24px;
     background-color: var(--border);
@@ -357,4 +369,61 @@ body {
     justify-content: center;
     align-items: center;
     height: calc(100vh - 200px);
+}
+
+.skeleton-message {
+    background-color: var(--ai-message-bg);
+    align-self: flex-start;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    max-width: 100%;
+    width: 100%;
+    animation: pulse 1.5s infinite;
+}
+
+.skeleton-line {
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.skeleton-line:last-child {
+    width: 70%;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.manage-files-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: calc(300px - 40px);
+    padding: 12px;
+    background-color: #2a2a2a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.manage-files-button img {
+    width: 16px;
+    height: 16px;
+}
+
+.manage-files-button:hover {
+    background-color: #252323;
 }

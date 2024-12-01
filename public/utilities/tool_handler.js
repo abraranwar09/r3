@@ -29,6 +29,9 @@ async function handleToolCalls(data) {
             case 'performGoogleSearch':
                 performGoogleSearch(args.query, functionName, data.tool_calls[0].id);
                 break;
+            case 'usePerplexity':
+                usePerplexity(args.query, functionName, data.tool_calls[0].id);
+                break;
             default:
                 console.warn(`Unhandled function name: ${functionName}`);
         }

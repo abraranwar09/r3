@@ -53,11 +53,6 @@
             </main>
 
             <footer class="chat-input">
-                <div class="toggles">
-                    <button class="toggle" data-tool="calendar">Calendar</button>
-                    <button class="toggle" data-tool="gmail">Gmail</button>
-                    <button class="toggle" data-tool="web-search">Web Search</button>
-                </div>
                 <div class="input-container">
                     <textarea class="message-input" placeholder="Write a message here..."></textarea>
                     <button class="send-button">
@@ -76,26 +71,49 @@
             <div class="tools-list">
                 <div class="tool-item">
                     <div class="tool-info">
-                        <div class="tool-name">Calendar</div>
-                        <div class="tool-description">Integrates with Google Calendar.</div>
+                        <img src="../assets/calendar.png" alt="Calendar icon" class="tool-icon">
+                        <div>
+                            <div class="tool-name">Calendar</div>
+                            <div class="tool-description">Integrates with Google Calendar.</div>
+                        </div>
                     </div>
                     <div class="tool-toggle" data-tool="calendar"></div>
                 </div>
                 <div class="tool-item">
                     <div class="tool-info">
-                        <div class="tool-name">Gmail</div>
-                        <div class="tool-description">Integrates with Gmail.</div>
+                        <img src="../assets/gmail.png" alt="Gmail icon" class="tool-icon">
+                        <div>
+                            <div class="tool-name">Gmail</div>
+                            <div class="tool-description">Integrates with Gmail.</div>
+                        </div>
                     </div>
                     <div class="tool-toggle" data-tool="gmail"></div>
                 </div>
                 <div class="tool-item">
                     <div class="tool-info">
-                        <div class="tool-name">Web Search</div>
-                        <div class="tool-description">Searches the web</div>
+                        <img src="../assets/google.png" alt="Google Search icon" class="tool-icon">
+                        <div>
+                            <div class="tool-name">Google Search</div>
+                            <div class="tool-description">Searches the web</div>
+                        </div>
                     </div>
                     <div class="tool-toggle" data-tool="web-search"></div>
                 </div>
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <img src="../assets/perplexity.png" alt="Perplexity icon" class="tool-icon">
+                        <div>
+                            <div class="tool-name">Perplexity</div>
+                            <div class="tool-description">AI-powered web search</div>
+                        </div>
+                    </div>
+                    <div class="tool-toggle" data-tool="perplexity"></div>
+                </div>
             </div>
+            <button class="manage-files-button">
+                <img src="../assets/paper.png" alt="File icon">
+                Manage Files
+            </button>
         </section>
     </div>
 

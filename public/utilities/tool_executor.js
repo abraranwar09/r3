@@ -95,6 +95,8 @@ async function getCalendarEvents(timePeriod, query, functionName, toolCallId) {
 
     let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
     console.log('toolCallResponse', toolCallResponse);
+    const skeletonLoader = document.querySelector('.skeleton-message');
+    if (skeletonLoader) skeletonLoader.remove();
     displayMessage(toolCallResponse.response, 'ai-message');
 }
 
@@ -142,6 +144,8 @@ async function saveEvent(summary, location, description, start, end, functionNam
 
     let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
     console.log('toolCallResponse', toolCallResponse);
+    const skeletonLoader = document.querySelector('.skeleton-message');
+    if (skeletonLoader) skeletonLoader.remove();
     displayMessage(toolCallResponse.response, 'ai-message');
 }
 
@@ -185,6 +189,8 @@ async function listGmailMessages(maxResults, query, functionName, toolCallId) {
 
         let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
         console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
         displayMessage(toolCallResponse.response, 'ai-message');
         
         } catch (error) {
@@ -228,6 +234,8 @@ async function getGmailMessage(messageId, functionName, toolCallId) {
 
         let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
         console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
         displayMessage(toolCallResponse.response, 'ai-message');
 
     } catch (error) {
@@ -277,6 +285,8 @@ async function sendGmailMessage(to, subject, body, cc, bcc, isHtml, functionName
 
         let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
         console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
         displayMessage(toolCallResponse.response, 'ai-message');
 
 
@@ -320,6 +330,8 @@ async function performGoogleSearch(query, functionName, toolCallId) {
 
         let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
         console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
         displayMessage(toolCallResponse.response, 'ai-message');
 
     } catch (error) {
@@ -327,6 +339,49 @@ async function performGoogleSearch(query, functionName, toolCallId) {
         const toolCallResults = {
             "status": "error",
             "message": `There was an error performing the Google search. Please try again later.`
+        };
+
+        let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
+        console.log('toolCallResponse', toolCallResponse);
+        displayMessage(toolCallResponse.response, 'ai-message');
+        return;
+    }
+}
+
+async function usePerplexity(query, functionName, toolCallId) {
+    const sessionId = localStorage.getItem('session_id');
+    const userId = localStorage.getItem('userId');
+
+    try {
+        const response = await fetch("/perplexity/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                query,
+                userId 
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        const toolCallResults = data;
+
+        let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
+        console.log('toolCallResponse', toolCallResponse);
+        const skeletonLoader = document.querySelector('.skeleton-message');
+        if (skeletonLoader) skeletonLoader.remove();
+        displayMessage(toolCallResponse.response, 'ai-message');
+
+    } catch (error) {
+        console.error('Error using Perplexity:', error);
+        const toolCallResults = {
+            "status": "error",
+            "message": `There was an error performing the Perplexity search. Please try again later.`
         };
 
         let toolCallResponse = await submitToolCall(sessionId, toolCallId, functionName, toolCallResults);
