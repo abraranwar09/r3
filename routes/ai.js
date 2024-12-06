@@ -17,7 +17,7 @@ router.use(express.json());
 // Chat endpoint
 router.post('/chat', async (req, res) => {
     try {
-        const { message, session_id, tools, user_id, tool_states } = req.body;
+        const { message, session_id, tools, user_id, tool_states, custom_prompt, custom_temp } = req.body;
 
         if (!message || !user_id) {
             return res.status(400).json({
@@ -34,11 +34,14 @@ router.post('/chat', async (req, res) => {
                 session_id,
                 name: chatName,
                 tool_states: new Map(Object.entries(tool_states || {})),
-                messages: [{"role": "system", "content": `
-                            Your name is CommandR. You are a helpful assistant. You can use your tools to help the user with their queries.
-                            Format your responses as structured HTML with the appropriate tags and styling like lists, paragraphs, etc. 
-                            Only respond in HTML no markdown. You have the ability to run parallel tool calls.
-                            `}]
+                messages: [{
+                    "role": "system", 
+                    "content": custom_prompt || `
+                        Your name is CommandR. You are a helpful assistant. You can use your tools to help the user with their queries.
+                        Format your responses as structured HTML with the appropriate tags and styling like lists, paragraphs, etc. 
+                        Only respond in HTML no markdown. You have the ability to run parallel tool calls.
+                    `
+                }]
             });
         } else {
             // Update tool states
@@ -73,7 +76,7 @@ router.post('/chat', async (req, res) => {
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: cleanedMessages,
-            temperature: 0.7,
+            temperature: custom_temp ? parseFloat(custom_temp) : 0.7,
             ...(tools && tools.length > 0 ? {
                 tools: tools,
                 parallel_tool_calls: true

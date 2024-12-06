@@ -47,7 +47,9 @@ async function sendMessage() {
             user_id: userId,
             message: message + reprompt,
             tools: activeTools,
-            tool_states: toolStates
+            tool_states: toolStates,
+            custom_prompt: localStorage.getItem('custom_prompt'),
+            custom_temp: localStorage.getItem('custom_temp')
         };
 
         try {
