@@ -3,34 +3,13 @@ const router = express.Router();
 const OpenAI = require('openai');
 const mongoose = require('mongoose');
 const { generateChatName } = require('../utils/nameGenerator');
+const ChatHistory = require('../models/chatHistoryModel');
 
 
 // Initialize OpenAI client
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });   
-
-// Define Chat History Schema
-const messageSchema = new mongoose.Schema({
-    role: String,
-    content: String,
-    name: String,
-    function_call: mongoose.Schema.Types.Mixed,
-    tool_calls: [mongoose.Schema.Types.Mixed],
-    tool_call_id: String
-}, { _id: false });
-
-const chatHistorySchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    session_id: { type: String, required: true, unique: true },
-    name: { type: String },
-    messages: [messageSchema],
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now },
-    tool_states: { type: Map, of: Boolean, default: new Map() }
-});
-
-const ChatHistory = mongoose.model('ChatHistory', chatHistorySchema);
 
 // Middleware to parse JSON bodies
 router.use(express.json());
@@ -56,10 +35,9 @@ router.post('/chat', async (req, res) => {
                 name: chatName,
                 tool_states: new Map(Object.entries(tool_states || {})),
                 messages: [{"role": "system", "content": `
-                            You are a helpful assistant. You can use your tools to help the user with their queries.
+                            Your name is CommandR. You are a helpful assistant. You can use your tools to help the user with their queries.
                             Format your responses as structured HTML with the appropriate tags and styling like lists, paragraphs, etc. 
-                            Only respond in HTML no markdown. You have the ability to run tool calls. Do not run parallel tool calls, but you can respond to a tool call
-                            with another tool call if you want to chain tool calls.
+                            Only respond in HTML no markdown. You have the ability to run parallel tool calls.
                             `}]
             });
         } else {
@@ -98,7 +76,7 @@ router.post('/chat', async (req, res) => {
             temperature: 0.7,
             ...(tools && tools.length > 0 ? {
                 tools: tools,
-                parallel_tool_calls: false
+                parallel_tool_calls: true
             } : {})
         });
 
@@ -141,29 +119,39 @@ router.post('/chat', async (req, res) => {
 // Tool call response endpoint
 router.post('/tool-response', async (req, res) => {
     try {
-        const { session_id, tool_call_id, function_name, function_response, tools } = req.body;
-
-        if (!session_id || !tool_call_id || !function_name || !function_response) {
-            return res.status(400).json({ 
-                error: 'Missing required fields: session_id, tool_call_id, function_name, function_response' 
-            });
-        }
-
+        const { session_id, tool_responses } = req.body;
+        console.log('Received tool responses:', JSON.stringify(tool_responses, null, 2));
+        
         // Find chat history
         let chatHistory = await ChatHistory.findOne({ session_id });
         if (!chatHistory) {
             return res.status(404).json({ error: 'Chat history not found' });
         }
 
-        // Add tool response message to history
-        chatHistory.messages.push({
-            role: 'tool',
-            content: typeof function_response === 'string' 
-                ? function_response 
-                : JSON.stringify(function_response),
-            name: function_name,
-            tool_call_id: tool_call_id
+        // Find the last assistant message with tool calls
+        const lastAssistantMessage = [...chatHistory.messages]
+            .reverse()
+            .find(msg => msg.role === 'assistant' && msg.tool_calls);
+
+        if (!lastAssistantMessage) {
+            return res.status(400).json({ error: 'No tool call message found' });
+        }
+
+        console.log('Last assistant message:', JSON.stringify(lastAssistantMessage, null, 2));
+
+        // Add tool responses in the correct format
+        tool_responses.forEach(response => {
+            chatHistory.messages.push({
+                role: 'tool',
+                content: typeof response.function_response === 'string' 
+                    ? response.function_response 
+                    : JSON.stringify(response.function_response),
+                tool_call_id: response.tool_call_id,
+                name: response.function_name // Add function name to match OpenAI's format
+            });
         });
+
+        console.log('Messages before OpenAI call:', JSON.stringify(chatHistory.messages, null, 2));
 
         // Clean messages before sending to OpenAI
         const cleanedMessages = chatHistory.messages.map(msg => {
@@ -172,6 +160,7 @@ router.post('/tool-response', async (req, res) => {
                 content: msg.content
             };
             
+            // Only include additional fields if they have values
             if (msg.name) cleanMsg.name = msg.name;
             if (msg.function_call) cleanMsg.function_call = msg.function_call;
             if (msg.tool_calls && msg.tool_calls.length > 0) {
@@ -179,18 +168,16 @@ router.post('/tool-response', async (req, res) => {
             }
             if (msg.tool_call_id) cleanMsg.tool_call_id = msg.tool_call_id;
             
-            return cleanMsg;
+            return cleanMsg; // {{ }}
         });
 
-        // Get OpenAI's response to the tool result
+        console.log('Cleaned messages:', JSON.stringify(cleanedMessages, null, 2));
+
+        // Get OpenAI's response to all tool results
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: cleanedMessages,
-            temperature: 0.7,
-            ...(tools && tools.length > 0 ? {
-                tools: tools,
-                parallel_tool_calls: false
-            } : {})
+            temperature: 0.7
         });
 
         // Get the assistant's response and completion details
@@ -225,6 +212,7 @@ router.post('/tool-response', async (req, res) => {
 
     } catch (error) {
         console.error('Tool Response API Error:', error);
+        console.error('Error details:', error.response?.data || error.message);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

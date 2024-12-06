@@ -66,7 +66,7 @@ async function sendMessage() {
                 displayMessage(data.response, 'ai-message');
             } else if (data.finish_reason === 'tool_calls') {
                 console.log(data);
-                handleToolCalls(data);
+                await handleToolCalls(data, skeletonLoader);
             }
 
             chatContent.scrollTop = chatContent.scrollHeight;
@@ -81,17 +81,23 @@ function handleSuggestionCardClick(event) {
     const card = event.currentTarget;
     const suggestionText = card.querySelector('p').textContent;
     
-    // Remove initial content
     if (initialContent) {
         initialContent.remove();
     }
 
-    // Display user message
     displayMessage(suggestionText, 'user-message');
 
-    // Send message to AI
     const session_id = localStorage.getItem('session_id');
     const userId = localStorage.getItem('userId');
+    
+    const skeletonLoader = document.createElement('div');
+    skeletonLoader.className = 'skeleton-message';
+    skeletonLoader.innerHTML = `
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+    `;
+    chatContent.appendChild(skeletonLoader);
     
     const requestBody = {
         session_id: session_id,
@@ -108,16 +114,20 @@ function handleSuggestionCardClick(event) {
         body: JSON.stringify(requestBody)
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
         if (data.finish_reason === 'stop') {
+            skeletonLoader.remove();
             displayMessage(data.response, 'ai-message');
         } else if (data.finish_reason === 'tool_calls') {
             console.log(data);
-            handleToolCalls(data);
+            await handleToolCalls(data, skeletonLoader);
         }
         chatContent.scrollTop = chatContent.scrollHeight;
     })
-    .catch(error => console.error('Error fetching AI response:', error));
+    .catch(error => {
+        skeletonLoader.remove();
+        console.error('Error fetching AI response:', error);
+    });
 }
 
 const cards = document.querySelectorAll('.card');
