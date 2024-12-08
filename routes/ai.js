@@ -175,7 +175,7 @@ router.post('/tool-response', async (req, res) => {
             return cleanMsg; // {{ }}
         });
 
-        console.log('Cleaned messages:', JSON.stringify(cleanedMessages, null, 2));
+        // console.log('Cleaned messages:', JSON.stringify(cleanedMessages, null, 2));
 
         // Get OpenAI's response to all tool results
         const completion = await openai.chat.completions.create({
@@ -308,45 +308,72 @@ router.get('/suggest', async (req, res) => {
 router.post('/scrape', async (req, res) => {
     let browser;
     try {
+        console.log('[Scrape] Starting scrape request:', { url: req.body.url });
         const { url } = req.body;
         const CHARACTER_LIMIT = 6000;
 
         if (!url) {
+            console.log('[Scrape] Error: No URL provided');
             return res.status(400).json({ error: 'URL is required' });
         }
 
         // Launch browser
+        console.log('[Scrape] Launching browser...');
         browser = await puppeteer.launch({
             headless: 'new',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
+        console.log('[Scrape] Browser launched successfully');
         
         const page = await browser.newPage();
+        console.log('[Scrape] New page created');
         
         // Set timeout and navigate to page
+        console.log('[Scrape] Navigating to URL:', url);
         await page.setDefaultNavigationTimeout(10000);
         await page.goto(url, { waitUntil: 'networkidle0' });
+        console.log('[Scrape] Successfully loaded page');
 
         // Extract text from specified tags
+        console.log('[Scrape] Starting content extraction');
         const content = await page.evaluate(() => {
             const tagsToScrape = ['p', 'h1', 'h2', 'h3'];
             const elements = document.querySelectorAll(tagsToScrape.join(','));
-            
-            return Array.from(elements)
+            const result = Array.from(elements)
                 .map(element => element.textContent.trim())
                 .filter(text => text)
                 .join('\n');
+            return result;
         });
+        console.log('[Scrape] Content extracted, length:', content.length);
 
         // Truncate content if necessary
         const truncatedContent = content.slice(0, CHARACTER_LIMIT);
+        console.log('[Scrape] Content truncated to length:', truncatedContent.length);
 
         await browser.close();
+        console.log('[Scrape] Browser closed successfully');
+        
         res.json({ content: truncatedContent || "No matching tags found" });
+        console.log('[Scrape] Response sent successfully');
 
     } catch (error) {
-        console.error('Scraping Error:', error);
-        if (browser) await browser.close();
+        console.error('[Scrape] Error details:', {
+            message: error.message,
+            stack: error.stack,
+            url: req.body.url,
+            browserState: browser ? 'initialized' : 'not initialized'
+        });
+        
+        if (browser) {
+            try {
+                await browser.close();
+                console.log('[Scrape] Browser closed after error');
+            } catch (closeError) {
+                console.error('[Scrape] Error closing browser:', closeError.message);
+            }
+        }
+        
         res.status(500).json({ 
             error: 'Scraping failed', 
             details: error.message 
