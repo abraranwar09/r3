@@ -241,8 +241,18 @@ router.get('/history/:session_id', async (req, res) => {
 router.get('/history/list/:user_id', async (req, res) => {
     try {
         const { user_id } = req.params;
-        const chatHistories = await ChatHistory.find({ user_id })
-            .sort({ updated_at: -1 });  // Sort by updated_at in descending order
+        const { last_n_items } = req.query;  // Get the query parameter
+
+        // Create base query and sort
+        let query = ChatHistory.find({ user_id })
+            .sort({ updated_at: -1 });
+
+        // Apply limit if last_n_items is provided and is a valid number
+        if (last_n_items && !isNaN(last_n_items)) {
+            query = query.limit(parseInt(last_n_items));
+        }
+
+        const chatHistories = await query;
 
         if (!chatHistories || chatHistories.length === 0) {
             return res.status(404).json({ error: 'No chat histories found for this user' });

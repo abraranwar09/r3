@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     historyList.appendChild(spinner);
 
     if (userId) {
-        fetch(`/ai/history/list/${userId}`)
+        fetch(`/ai/history/list/${userId}?last_n_items=20`)
             .then(response => response.json())
             .then(data => {
                 // Remove loading spinner
