@@ -321,7 +321,8 @@ router.post('/scrape', async (req, res) => {
         console.log('[Scrape] Launching browser...');
         browser = await puppeteer.launch({
             headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: '/usr/bin/chromium-browser'
         });
         console.log('[Scrape] Browser launched successfully');
         
