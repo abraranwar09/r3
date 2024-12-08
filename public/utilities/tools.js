@@ -4,7 +4,8 @@ const toolMapping = {
     'gmail': ['listGmailMessages', 'getGmailMessage', 'sendGmailMessage'],
     'web-search': ['performGoogleSearch'],
     'perplexity': ['usePerplexity'],
-    'knowledge-base': ['checkKnowledgeBase']
+    'knowledge-base': ['checkKnowledgeBase'],
+    'web-scraper': ['scrapeWeb']
 };
 
 // Initialize tools array (keeping your existing tools array)
@@ -189,6 +190,24 @@ const tools = [
                     },
                 },
                 required: ["query"],
+                additionalProperties: false,
+            },
+        },
+    },
+    {
+        type: "function",
+        function: {
+            name: "scrapeWeb",
+            description: "Scrapes content from a specified webpage URL.",
+            parameters: {
+                type: "object",
+                properties: {
+                    url: {
+                        type: "string",
+                        description: "The URL of the webpage to scrape.",
+                    },
+                },
+                required: ["url"],
                 additionalProperties: false,
             },
         },

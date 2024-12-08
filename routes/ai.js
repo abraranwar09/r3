@@ -4,6 +4,7 @@ const OpenAI = require('openai');
 const mongoose = require('mongoose');
 const { generateChatName } = require('../utils/nameGenerator');
 const ChatHistory = require('../models/chatHistoryModel');
+const puppeteer = require('puppeteer');
 
 
 // Initialize OpenAI client
@@ -300,6 +301,56 @@ router.get('/suggest', async (req, res) => {
     } catch (error) {
         console.error('Suggestions API Error:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Web scraping endpoint
+router.post('/scrape', async (req, res) => {
+    let browser;
+    try {
+        const { url } = req.body;
+        const CHARACTER_LIMIT = 6000;
+
+        if (!url) {
+            return res.status(400).json({ error: 'URL is required' });
+        }
+
+        // Launch browser
+        browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        const page = await browser.newPage();
+        
+        // Set timeout and navigate to page
+        await page.setDefaultNavigationTimeout(10000);
+        await page.goto(url, { waitUntil: 'networkidle0' });
+
+        // Extract text from specified tags
+        const content = await page.evaluate(() => {
+            const tagsToScrape = ['p', 'h1', 'h2', 'h3'];
+            const elements = document.querySelectorAll(tagsToScrape.join(','));
+            
+            return Array.from(elements)
+                .map(element => element.textContent.trim())
+                .filter(text => text)
+                .join('\n');
+        });
+
+        // Truncate content if necessary
+        const truncatedContent = content.slice(0, CHARACTER_LIMIT);
+
+        await browser.close();
+        res.json({ content: truncatedContent || "No matching tags found" });
+
+    } catch (error) {
+        console.error('Scraping Error:', error);
+        if (browser) await browser.close();
+        res.status(500).json({ 
+            error: 'Scraping failed', 
+            details: error.message 
+        });
     }
 });
 

@@ -282,6 +282,37 @@ async function checkKnowledgeBase(query) {
     }
 }
 
+async function scrapeWeb(url) {
+    const userId = localStorage.getItem('userId');
+
+    try {
+        const response = await fetch("/ai/scrape", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                url,
+                userId 
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error('Error scraping web:', error);
+        return {
+            "status": "error",
+            "message": `There was an error scraping the webpage. Please try again later.`
+        };
+    }
+}
+
 
 
 

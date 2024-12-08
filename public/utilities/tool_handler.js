@@ -36,6 +36,9 @@ async function handleToolCalls(data, skeletonLoader) {
                 case 'checkKnowledgeBase':
                     functionResponse = await checkKnowledgeBase(args.query);
                     break;
+                case 'scrapeWeb':
+                    functionResponse = await scrapeWeb(args.url);
+                    break;
                 default:
                     console.warn(`Unhandled function name: ${functionName}`);
                     return null;
